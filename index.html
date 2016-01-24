@@ -12,9 +12,12 @@
 		<script src="vendor/three.js/Stats.js"></script>
 
 		<script src="vendor/threex/THREEx.screenshot.js"></script>
+		<script src='vendor/threex/THREEx.KeyboardState.js'></script>
 		<script src="vendor/threex/THREEx.FullScreen.js"></script>
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
 		<script src="vendor/threex.dragpancontrols.js"></script>
+		<script src="vendor/JSRocket/all-rocket.js"></script>
+		<script src="js/Tune.js"></script>
 
 		<link  href="css/main.css" rel="stylesheet"/>
 	</head>
@@ -23,34 +26,127 @@
     	<div id="container"></div>
 	<!-- info on screen display -->
 	<div id="info">
-		<div class="top">
-			<a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/" target="_blank">LearningThree.js</a>
-			boiler plate for
-			<a href="https://github.com/mrdoob/three.js/" target="_blank">three.js</a>
-		</div>
 		<div class="bottom" id="inlineDoc" >
-			- <i>p</i> for screenshot
-		</div> 
-	</div> 
+		</div>
+	</div>
 
 	<script type="text/javascript">
+		var keyboard = new THREEx.KeyboardState();
+		var step = 0.0;
 		var stats, scene, renderer, composer;
-		var camera, cameraControl;
+		var camera;
+		//var song = document.getElementById("the-song");
+		var cube = undefined;
+		var song = new Tune("assets/big.mp3");
 
-		if( !init() )	animate();
+		//This is the API you'll use
+		var syncDevice = new JSRocket.SyncDevice(),
+
+        //Beats per minute of your demo tune
+				BPM = 130,
+
+        //The resolution between two beats, four is usually fine,- eight adds a bit more finer control
+				ROWS_PER_BEAT = 8,
+
+        //we calculate this now, so we can translate between rows and seconds later on
+				ROW_RATE = BPM / 60 * ROWS_PER_BEAT,
+
+        //your variable that needs tuning in Rocket
+				awesomeness,
+				piano,
+
+        //the current row we're on
+				row = 0;
+
+		//syncDevice.setConfig({socketURL:"ws://lolcathost:1338"});
+		//initialize the connection, default URL is ws://localhost:1338/
+
+		syncDevice.init();
+
+		//-- set up all the things --
+		//this is also triggered when the Rocket XML is done, so make sure your ogg is ready
+		syncDevice.on('ready', onSyncReady);
+		//whenever you change the row, a value or interpolation mode this will get called
+		syncDevice.on('update', onSyncUpdate);
+		//[Spacebar] in Rocket calls one of those
+		syncDevice.on('play', onPlay);
+		syncDevice.on('pause', onPause);
+
+		function onSyncReady(){
+			//jsRocket is done getting all the info you already have in Rocket, or is done parsing the .rocket file
+
+			//this either adds a track to Rocket, or gets it for you
+			awesomeness = syncDevice.getTrack('AmountOfAwesome');
+			piano = syncDevice.getTrack('Piano');
+
+			initScene();
+			startAnimation();
+		}
+
+		function onSyncUpdate(newRow){
+			//row is only given if you navigate, or change a value on the row in Rocket
+			//on interpolation change (hit [i]) no row value is sent, as the current there is the upper row of your block
+			if(!isNaN(row)){
+				row = newRow;
+			}
+
+			console.log("[onSyncUpdate] row " + row);
+
+			console.log("[onSyncUpdate] seeking", row / ROW_RATE);
+			song.seek(row / ROW_RATE);
+			console.log("[onSyncUpdate] song time in seconds", song.position());
+
+
+			// rerender the view
+			animate();
+		}
+
+		function startAnimation() {
+			//song.start();
+			//animate();
+		}
+
+		function playAnimation() {
+			song.play();
+			animate();
+		}
+
+		function pauseAnimation() {
+			song.pause();
+		}
+
+		function onPlay(){
+			console.log("[onPlay] song time in seconds", song.position());
+			console.log("[onPlay] row =", row);
+			playAnimation();
+
+			//you could also set tune.currentTime here
+			console.log("[onPlay] time in seconds", row / ROW_RATE);
+		}
+
+		function onPause(){
+			pauseAnimation();
+
+			//pause your tune
+			console.log("[onPause] time in seconds", row / ROW_RATE);
+			console.log("[onPause] time in seconds", song.position());
+		}
 
 		// init the scene
-		function init(){
+		function initScene(){
 
 			if( Detector.webgl ){
 				renderer = new THREE.WebGLRenderer({
 					antialias		: true,	// to get smoother output
 					preserveDrawingBuffer	: true	// to allow screenshot
 				});
-				renderer.setClearColor( 0xbbbbbb );
-			}else{
+				renderer.setClearColor(0x0);
+
+				//console.log("[renderer] using OpenGL")
+			} else {
 				renderer	= new THREE.CanvasRenderer();
 			}
+
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.getElementById('container').appendChild(renderer.domElement);
 
@@ -65,11 +161,9 @@
 
 			// put a camera in the scene
 			camera	= new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.set(0, 0, 5);
+			camera.position.set(0, 1, 5);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
 			scene.add(camera);
-
-			// create a camera contol
-			cameraControls	= new THREEx.DragPanControls(camera)
 
 			// transparently support window resize
 			THREEx.WindowResize.bind(renderer, camera);
@@ -88,23 +182,26 @@
 			var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
 			light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
 			scene.add( light );
-			var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
-			light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
-			scene.add( light );
-			var light	= new THREE.PointLight( Math.random() * 0xffffff );
-			light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
-						.normalize().multiplyScalar(1.2);
-			scene.add( light );
-			var light	= new THREE.PointLight( Math.random() * 0xffffff );
-			light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
-						.normalize().multiplyScalar(1.2);
-			scene.add( light );
 
 			var geometry	= new THREE.CubeGeometry( 2, 2, 2 );
-			var material	= new THREE.MeshNormalMaterial();
-			var mesh	= new THREE.Mesh( geometry, material ); 
-			scene.add( mesh );
+			var material	= new THREE.MeshBasicMaterial( {color : 0x00ffff});
+			//var material	= new THREE.MeshNormalMaterial();
+
+			cube	= new THREE.Mesh( geometry, material );
+			cube.position.z = -40;
+			cube.position.y = 1.5;
+			scene.add( cube );
+
+			var size = 100;
+			var step = 1;
+
+			var gridHelper = new THREE.GridHelper( size, step );
+			gridHelper.setColors(0x00ffff, 0x00ffff);
+			scene.add( gridHelper );
+
+			scene.fog = new THREE.FogExp2(0x0, 1.0);
 		}
+
 
 		// animation loop
 		function animate() {
@@ -112,42 +209,50 @@
 			// loop on request animation loop
 			// - it has to be at the begining of the function
 			// - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
-			requestAnimationFrame( animate );
+			if(song.isPaused() === false)
+                requestAnimationFrame( animate );
 
-			// do the render
-			render();
+
+			// update the current row
+			if(song.isPaused() === false) {
+				row = song.position() * ROW_RATE;
+				console.log("row =", row);
+				syncDevice.update(row);
+			}
+
+			// variable which is increase by Math.PI every seconds - usefull for animation
+			var time	= song.position();
+
+			scene.fog.density = awesomeness.getValue(row);
+
+			cube.material.color.setHex(0x00ffff*piano.getValue(row));
+
+			// update camera controls
+			//cameraControls.update();
+
+			camera.position.z = -0.5*time;
+
+			cube.rotation.y = time*Math.PI/2.0 + step;
+			cube.rotation.x = time*Math.PI/2.0 + step;
+
+
+			////////////////////////////
+			// HOTKEYS
+			//////////////////////////
+			//if(keyboard.pressed("r"))
+			//	restart();
+			//if(keyboard.pressed("space"))
+			//	togglePause();
 
 			// update stats
 			stats.update();
+
+			// do the render
+			render();
 		}
 
 		// render the scene
 		function render() {
-			// variable which is increase by Math.PI every seconds - usefull for animation
-			var PIseconds	= Date.now() * Math.PI;
-
-			// update camera controls
-			cameraControls.update();
-
-			// animation of all objects
-			scene.traverse(function(object3d, i){
-				if( object3d instanceof THREE.Mesh === false )	return
-				object3d.rotation.y = PIseconds*0.0003 * (i % 2 ? 1 : -1);
-				object3d.rotation.x = PIseconds*0.0002 * (i % 2 ? 1 : -1);
-			})
-			// animate DirectionalLight
-			scene.traverse(function(object3d, idx){
-				if( object3d instanceof THREE.DirectionalLight === false )	return
-				var ang	= 0.0005 * PIseconds * (idx % 2 ? 1 : -1);
-				object3d.position.set(Math.cos(ang), Math.sin(ang), Math.cos(ang*2)).normalize();
-			})
-			// animate PointLights
-			scene.traverse(function(object3d, idx){
-				if( object3d instanceof THREE.PointLight === false )	return
-				var angle	= 0.0005 * PIseconds * (idx % 2 ? 1 : -1) + idx * Math.PI/3;
-				object3d.position.set(Math.cos(angle)*3, Math.sin(angle*3)*2, Math.cos(angle*2)).normalize().multiplyScalar(2);
-			})
-
 			// actually render the scene
 			renderer.render( scene, camera );
 		}

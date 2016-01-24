@@ -361,7 +361,7 @@ JSRocket.SyncDevicePlayer = function (cfg) {
                     true);
 
             }
-            track.sortIndex();
+            //track.sortIndex();
         }
 
         _eventHandler.ready();

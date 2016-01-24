@@ -1,0 +1,85 @@
+<sync rows="5100">
+	<tracks>
+		<track name="AmountOfAwesome">
+			<key value="1" interpolation="1" row="0"/>
+			<key value="1" interpolation="3" row="112"/>
+			<key value="0.3" interpolation="1" row="248"/>
+			<key value="0.1" interpolation="1" row="272"/>
+			<key value="0.05" interpolation="3" row="288"/>
+			<key value="0.025" interpolation="0" row="304"/>
+			<key value="1" interpolation="0" row="5072"/>
+		</track>
+		<track name="Piano">
+			<key value="0" interpolation="0" row="0"/>
+			<key value="0" interpolation="1" row="492"/>
+			<key value="2" interpolation="2" row="493"/>
+			<key value="0" interpolation="0" row="494"/>
+			<key value="0" interpolation="1" row="496"/>
+			<key value="1" interpolation="2" row="497"/>
+			<key value="0" interpolation="0" row="498"/>
+			<key value="0" interpolation="1" row="503"/>
+			<key value="1" interpolation="2" row="504"/>
+			<key value="0" interpolation="0" row="505"/>
+			<key value="0" interpolation="1" row="511"/>
+			<key value="2" interpolation="2" row="512"/>
+			<key value="0.5" interpolation="2" row="513"/>
+			<key value="0" interpolation="0" row="514"/>
+			<key value="0" interpolation="1" row="520"/>
+			<key value="1" interpolation="2" row="521"/>
+			<key value="0" interpolation="0" row="522"/>
+			<key value="0" interpolation="1" row="526"/>
+			<key value="1" interpolation="2" row="527"/>
+			<key value="0" interpolation="0" row="528"/>
+			<key value="0" interpolation="1" row="533"/>
+			<key value="1" interpolation="2" row="534"/>
+			<key value="0" interpolation="0" row="535"/>
+			<key value="0" interpolation="1" row="542"/>
+			<key value="1" interpolation="2" row="543"/>
+			<key value="0" interpolation="0" row="544"/>
+			<key value="1" interpolation="0" row="550"/>
+			<key value="1" interpolation="0" row="553"/>
+			<key value="0" interpolation="0" row="554"/>
+			<key value="0" interpolation="0" row="558"/>
+			<key value="0.25" interpolation="0" row="560"/>
+			<key value="0.5" interpolation="0" row="563"/>
+			<key value="0.75" interpolation="0" row="566"/>
+			<key value="1" interpolation="1" row="569"/>
+			<key value="0" interpolation="0" row="571"/>
+			<key value="0" interpolation="0" row="5072"/>
+		</track>
+		<track name="Camera">
+			<key value="0" interpolation="2" row="432"/>
+			<key value="5.5" interpolation="0" row="491"/>
+			<key value="5.5" interpolation="1" row="1024"/>
+			<key value="6.5" interpolation="1" row="1030"/>
+			<key value="5.5" interpolation="0" row="1036"/>
+			<key value="5.5" interpolation="1" row="1173"/>
+			<key value="6.5" interpolation="1" row="1179"/>
+			<key value="5.5" interpolation="0" row="1185"/>
+			<key value="5.5" interpolation="1" row="1268"/>
+			<key value="6.5" interpolation="1" row="1274"/>
+			<key value="5.5" interpolation="0" row="1280"/>
+			<key value="1" interpolation="0" row="5072"/>
+		</track>
+		<track name="Scale">
+			<key value="1" interpolation="0" row="0"/>
+			<key value="1" interpolation="1" row="491"/>
+			<key value="0.01" interpolation="2" row="744"/>
+			<key value="1" interpolation="0" row="1024"/>
+			<key value="0.9" interpolation="3" row="1790"/>
+			<key value="0.7" interpolation="2" row="1793"/>
+			<key value="0.1" interpolation="0" row="1794"/>
+			<key value="0.3" interpolation="0" row="1795"/>
+			<key value="0.6" interpolation="3" row="1796"/>
+			<key value="0.1" interpolation="0" row="1797"/>
+			<key value="0.2" interpolation="0" row="1798"/>
+			<key value="0.4" interpolation="1" row="1800"/>
+			<key value="1.2" interpolation="1" row="1803"/>
+			<key value="1" interpolation="0" row="1807"/>
+			<key value="1" interpolation="0" row="5072"/>
+		</track>
+	</tracks>
+	<bookmarks>
+		<bookmark row="0"/>
+	</bookmarks>
+</sync>

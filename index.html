@@ -1,11 +1,11 @@
 <!doctype html>
 <html>
 	<head>
-		<title>learningthree.js boiler plate for three.js</title>
+		<title>Outer Realm</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		
-			
+
+
 		<script src="vendor/three.js/Three.js"></script>
 		<script src="vendor/three.js/Detector.js"></script>
 		<!-- https://github.com/mrdoob/stats.js -->
@@ -17,18 +17,28 @@
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
 		<script src="vendor/threex.dragpancontrols.js"></script>
 		<script src="vendor/JSRocket/all-rocket.js"></script>
+		<script src="js/TexGen.js"></script>
 		<script src="js/Tune.js"></script>
 
-		<link  href="css/main.css" rel="stylesheet"/>
+		<link href="css/main.css" rel="stylesheet"/>
+		<link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
 	</head>
 <body>
-	<!-- three.js container -->
-    	<div id="container"></div>
 	<!-- info on screen display -->
 	<div id="info">
 		<div class="bottom" id="inlineDoc" >
 		</div>
+		<div id="intro-credits">
+			<h1>Outer Realm</h1>
+			<h3>code - grant</h3>
+			<h3>sync - grant</h3>
+			<h3>sound - Electromagnetic Blaze</h3>
+		</div>
 	</div>
+
+	<!-- three.js container -->
+	<div id="container"></div>
+
 
 	<script type="text/javascript">
 		var keyboard = new THREEx.KeyboardState();
@@ -36,8 +46,19 @@
 		var stats, scene, renderer, composer;
 		var camera;
 		//var song = document.getElementById("the-song");
+		var cubes = {};
 		var cube = undefined;
+		var demo = true;
 		var song = new Tune("assets/big.mp3");
+
+		var cubeTexture = new TG.Texture( 256, 256).
+				add(new TG.SinX().frequency(0.1).offset(4.64).tint(54.0/255, 191/255, 1.0)).
+                add(new TG.SinY().frequency(0.1).offset(4.64).tint(1.0, 235.0/255, 212.0/255)).
+                set(new TG.Twirl().radius(220.0).position(128, 128).strength(20.92).tint(247.0/255, 112/255.0, 0.0));
+
+		// create THREE.Texture from TG.Texture
+		var cubeTexture3JS = new THREE.Texture(cubeTexture.toCanvas());
+		cubeTexture3JS.needsUpdate = true;
 
 		//This is the API you'll use
 		var syncDevice = new JSRocket.SyncDevice(),
@@ -54,6 +75,8 @@
         //your variable that needs tuning in Rocket
 				awesomeness,
 				piano,
+				cameraTween,
+				cubeScale,
 
         //the current row we're on
 				row = 0;
@@ -61,7 +84,12 @@
 		//syncDevice.setConfig({socketURL:"ws://lolcathost:1338"});
 		//initialize the connection, default URL is ws://localhost:1338/
 
-		syncDevice.init();
+		if(demo) {
+			syncDevice.setConfig({'rocketXML':'swampdemo.rocket'});
+			syncDevice.init("demo");
+		} else {
+			syncDevice.init();
+		}
 
 		//-- set up all the things --
 		//this is also triggered when the Rocket XML is done, so make sure your ogg is ready
@@ -78,9 +106,12 @@
 			//this either adds a track to Rocket, or gets it for you
 			awesomeness = syncDevice.getTrack('AmountOfAwesome');
 			piano = syncDevice.getTrack('Piano');
+			cameraTween = syncDevice.getTrack('Camera');
+			cubeScale = syncDevice.getTrack('Scale');
 
 			initScene();
-			startAnimation();
+			if(demo)
+                startAnimation();
 		}
 
 		function onSyncUpdate(newRow){
@@ -92,8 +123,8 @@
 
 			console.log("[onSyncUpdate] row " + row);
 
-			console.log("[onSyncUpdate] seeking", row / ROW_RATE);
-			song.seek(row / ROW_RATE);
+			//console.log("[onSyncUpdate] seeking", row / ROW_RATE);
+			//song.seek(row / ROW_RATE);
 			console.log("[onSyncUpdate] song time in seconds", song.position());
 
 
@@ -102,16 +133,19 @@
 		}
 
 		function startAnimation() {
-			//song.start();
-			//animate();
-		}
-
-		function playAnimation() {
-			song.play();
+			song.start();
 			animate();
 		}
 
+		function playAnimation() {
+			song.seek(row / ROW_RATE);
+			song.play(function() { animate() });
+			//animate();
+		}
+
 		function pauseAnimation() {
+			row = song.position() * ROW_RATE;
+			window.cancelAnimationFrame(animate);
 			song.pause();
 		}
 
@@ -154,7 +188,9 @@
 			stats = new Stats();
 			stats.domElement.style.position	= 'absolute';
 			stats.domElement.style.bottom	= '0px';
-			document.body.appendChild( stats.domElement );
+
+			if(!demo)
+                document.body.appendChild( stats.domElement );
 
 			// create a scene
 			scene = new THREE.Scene();
@@ -171,8 +207,8 @@
 			THREEx.Screenshot.bindKey(renderer);
 			// allow 'f' to go fullscreen where this feature is supported
 			if( THREEx.FullScreen.available() ){
-				THREEx.FullScreen.bindKey();		
-				document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
+				THREEx.FullScreen.bindKey();
+				document.getElementById('inlineDoc').innerHTML	= "<i>f</i> for fullscreen";
 			}
 
 			// here you add your objects
@@ -184,19 +220,35 @@
 			scene.add( light );
 
 			var geometry	= new THREE.CubeGeometry( 2, 2, 2 );
-			var material	= new THREE.MeshBasicMaterial( {color : 0x00ffff});
+			//var material	= new THREE.MeshBasicMaterial( {color : 0x00ffff});
+			var material	= new THREE.MeshBasicMaterial( {map : cubeTexture3JS});
 			//var material	= new THREE.MeshNormalMaterial();
 
 			cube	= new THREE.Mesh( geometry, material );
 			cube.position.z = -40;
-			cube.position.y = 1.5;
-			scene.add( cube );
+			cube.position.y = 2.0;
 
-			var size = 100;
+			var edgesCube = new THREE.EdgesHelper(cube, 0x00ff00);
+			edgesCube.material.linewidth = 4.0;
+			scene.add(cube);
+			scene.add(edgesCube);
+
+			var size = 75;
 			var step = 1;
 
 			var gridHelper = new THREE.GridHelper( size, step );
 			gridHelper.setColors(0x00ffff, 0x00ffff);
+			gridHelper.position.z = -40;
+
+			for(var i = 0; i < gridHelper.geometry.vertices.length; i++) {
+				gridHelper.geometry.morphTargets.push( { name: "target" + i, vertices: gridHelper.geometry.vertices[i]} );
+			}
+
+			console.log(gridHelper);
+			for(var i = 0; i < gridHelper.geometry.vertices.length; i++) {
+				//gridHelper.geometry.vertices[i].setY(Math.sin(i * Math.PI / 8) * 1.0);
+			}
+
 			scene.add( gridHelper );
 
 			scene.fog = new THREE.FogExp2(0x0, 1.0);
@@ -216,25 +268,66 @@
 			// update the current row
 			if(song.isPaused() === false) {
 				row = song.position() * ROW_RATE;
-				console.log("row =", row);
+				//console.log("row =", row);
 				syncDevice.update(row);
 			}
 
-			// variable which is increase by Math.PI every seconds - usefull for animation
 			var time	= song.position();
+
+			if(time <= 15) {
+				var intro = document.getElementById("intro-credits");
+
+				var theTitle = intro.children[0];
+				var creds = [];
+
+				creds.push(intro.children[1]);
+				creds.push(intro.children[2]);
+				creds.push(intro.children[3]);
+
+				if(time < 4.5)
+                    theTitle.style.opacity = Math.max(Math.sin(time-3.0), 0);
+				else if(time <= 13.0)
+					theTitle.style.opacity = 1.0
+				else
+					theTitle.style.opacity = Math.max(Math.cos(time-13.0), 0);
+
+				for(var i = 0; i < 3; i++) {
+					var timeBase = 5 + 2*i;
+					if(time < timeBase + 3.5)
+                        creds[i].style.opacity = Math.max(Math.sin(Math.max(time-timeBase, 0)), 0);
+					else
+                        creds[i].style.opacity = 0.0;
+				}
+			}
+
 
 			scene.fog.density = awesomeness.getValue(row);
 
-			cube.material.color.setHex(0x00ffff*piano.getValue(row));
+			cube.material.color.setHex(0x00ff00 | (0xff*piano.getValue(row) << 16));
 
 			// update camera controls
 			//cameraControls.update();
 
-			camera.position.z = -0.5*time;
+			//camera.position.z = -0.5*time;
 
-			cube.rotation.y = time*Math.PI/2.0 + step;
-			cube.rotation.x = time*Math.PI/2.0 + step;
+			var tween = cameraTween.getValue(row)*Math.PI;
 
+			//camera.position.x = 20.0 - Math.cos(tween)*20.0;
+			if(time < 120)
+                camera.position.z = Math.sin(tween/4.0)*20.0 - 0.5*time;
+			else
+				camera.position.z = Math.sin(tween/4.0)*20.0 - 0.5*(240-time);
+
+			//if(tween > 0.0) {
+			camera.lookAt(cube.position);
+			//	camera.position.y = Math.sin(tween)*2.0 + 3.5;
+			//}
+
+			cube.rotation.y = time*Math.PI/4.0;
+			cube.rotation.x = time*Math.PI/4.0;
+
+			var localScale = cubeScale.getValue(row);
+			cube.scale.set(localScale, localScale, localScale);
 
 			////////////////////////////
 			// HOTKEYS

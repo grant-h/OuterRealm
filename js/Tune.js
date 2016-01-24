@@ -4,25 +4,35 @@ var Tune = function (song) {
     var _cachedTime = undefined;
     _snd.src = song;
 
-    _snd.addEventListener("play", function() {
+    /*_snd.addEventListener("pause", function() {
+        console.log("[Tune] paused", _cachedTime);
         if(_cachedTime !== undefined) {
-            console.log("[Tune] setting time", _cachedTime);
             _snd.currentTime = _cachedTime;
             _cachedTime = undefined;
+            console.log("[Tune] result", _snd.currentTime);
         }
-    });
+    });*/
 
     function start() {
         _snd.currentTime = 0;
         play();
     }
 
-    function play() {
+    function play(cb) {
+        if(cb !== undefined) {
+            var fn = function () {
+                cb();
+                _snd.removeEventListener("play", fn)
+            };
+            _snd.addEventListener("play", fn);
+        }
+
         _snd.play();
     }
 
     function stop() {
-        _snd.stop()
+        _snd.pause();
+        _snd.currentTime = 0;
     }
 
     function pause() {
@@ -40,14 +50,8 @@ var Tune = function (song) {
     }
 
     function seek(time) {
-        //console.log("seek inner", time);
-
-        if(isPaused()) {
-            //_cachedTime = time;
-        } else {
-            _snd.currentTime = time;
-            //_snd.currentTime = time;
-        }
+        //_snd.pause();
+        _snd.currentTime = time;
     }
 
     function isPaused() {

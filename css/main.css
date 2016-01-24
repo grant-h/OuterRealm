@@ -3,9 +3,9 @@ body {
 	padding		: 0;
 	margin		: 0;
 
-	color		: #222;
+	color		: white;
 	background-color: #BBB;
-	font-family	: arial;
+	font-family	: 'Play', sans-serif;
 	font-size	: 100%;
 }
 #info .top {
@@ -27,4 +27,21 @@ body {
 	bottom		: 0px;
 	right		: 5px;
 	padding		: 5px;
+}
+
+#info #intro-credits {
+	position: absolute;
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 3em;
+	top: 5%;
+	left: 0;
+	right: 0;
+	text-align: center;
+	z-index: 200;
+	width: 100%;
+}
+
+#intro-credits h1, #intro-credits h3 {
+	opacity: 0.0;
 }

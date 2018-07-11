@@ -44,4 +44,46 @@ body {
 
 #intro-credits h1, #intro-credits h3 {
 	opacity: 0.0;
+	margin: 30px auto;
+}
+
+/* debugging */
+#debug {
+	padding-top: 5px;
+	position: fixed;
+	bottom: 0;
+	height: 24px;
+	width: 100%;
+	background-color: black;
+}
+#ticker_controls {
+	float: left;
+	width: 19%;
+	padding-left: 10px;
+}
+#ticker_controls i.fa {
+	cursor: pointer;
+	color: white;
+	float: left;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+#ticker {
+	float: left;
+	width: 50%;
+	background-color: white;
+	cursor: crosshair;
+	position: relative;
+}
+#ticker_pointer {
+	position: absolute;
+	width: 2px;
+	height: 24px;
+	background-color: black;
+}
+
+#inlineDoc {
+	text-align: right;
+	padding-left: 10px;
+	padding-right: 5px;
 }

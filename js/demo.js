@@ -5,8 +5,9 @@ var camera;
 //var song = document.getElementById("the-song");
 var cubes = {};
 var cube = undefined;
-var demo = false;
+var demo = true;
 var song = new Tune("assets/big.mp3");
+var tickerPointer = document.getElementById('ticker_pointer');
 
 var cubeTexture = new TG.Texture( 256, 256).
                 add(new TG.SinX().frequency(0.1).offset(4.64).tint(54.0/255, 191/255, 1.0)).
@@ -70,7 +71,7 @@ function onSyncReady(){
 
         initScene();
         if(demo)
-startAnimation();
+            startAnimation();
 }
 
 function onSyncUpdate(newRow){
@@ -294,6 +295,8 @@ camera.position.z = Math.sin(tween/4.0)*20.0 - 0.5*time;
 
         // update stats
         stats.update();
+
+        tickerPointer.style.left = (song.position() * 100 / song.duration()) + '%';
 }
 
 // render the scene

@@ -54,6 +54,10 @@ var Tune = function (song) {
         _snd.currentTime = time;
     }
 
+    function duration() {
+        return _snd.duration;
+    }
+
     function isPaused() {
        return _snd.paused;
     }
@@ -66,6 +70,7 @@ var Tune = function (song) {
         restart : restart,
         position : position,
         seek : seek,
+        duration : duration,
         isPaused : isPaused
     }
 }

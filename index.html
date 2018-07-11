@@ -20,14 +20,13 @@
 		<script src="js/TexGen.js"></script>
 		<script src="js/Tune.js"></script>
 
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet"/>
 		<link href="css/main.css" rel="stylesheet"/>
 		<link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
 	</head>
 <body>
 	<!-- info on screen display -->
 	<div id="info">
-		<div class="bottom" id="inlineDoc" >
-		</div>
 		<div id="intro-credits">
 			<h1>Outer Realm</h1>
 			<h3>code - grant</h3>
@@ -39,7 +38,33 @@
 	<!-- three.js container -->
 	<div id="container"></div>
 
+	<div id="debug">
+		<div id="ticker_controls">
+			<i onclick="javascript:void(playAnimation())" class="fa fa-play" aria-hidden="true"></i>
+			<i onclick="javascript:void(pauseAnimation())" class="fa fa-stop" aria-hidden="true"></i>
+		</div>
+		<div id="ticker"><div id="ticker_pointer"></div>&nbsp;</div>
+
+		<div class="bottom" id="inlineDoc" >
+		</div>
+	</div>
+	</body>
+
 	<!-- load the demo -->
 	<script src="js/demo.js" type="text/javascript"> </script>
+
+	<script type="text/javascript">
+		var tickerRef = document.getElementById('ticker');
+		tickerRef.onmousedown = function(e) {
+			var time = e.layerX * song.duration() / tickerRef.getBoundingClientRect().width;
+
+			song.seek(time);
+			if (song.isPaused()) {
+				pauseAnimation();
+				playAnimation();
+				pauseAnimation();
+			}
+		}
+	</script>
 </body>
 </html>
